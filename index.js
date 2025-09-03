@@ -55,4 +55,8 @@ const Movie = mongoose.model('Movie', movieSchema);
 // Movie.updateMany({year: {$lte: 2018}}, {rating:9.5}).then(response => console.log(response))
 // .catch(error => console.log("error :",error))
 
-Movie
+
+// //deleted 
+// Movie.deleteMany({ director: 'Repan' })
+//     .then(response => console.log("DeleteMany result:", response))
+//     .catch(error => console.log("Error deleteMany:", error));
