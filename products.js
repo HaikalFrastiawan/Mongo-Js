@@ -8,6 +8,7 @@ const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     brand: { type: String, required: true },
     price: { type: Number, min: 0 },
+     discount: Number,
     color: String,
     size: [String],
     description: { type: String, minlength: 20 }, // pastikan panjang
@@ -19,7 +20,47 @@ const productSchema = new mongoose.Schema({
     }
 });
 
+productSchema.methods.outStock = function() {
+    this.stock = 0
+    return this.save()
+}
+
+productSchema.virtual("finalPrice").get(function(){
+  return this.price - (this.price*(this.discount/100))
+})
+
+//midleware
+productSchema.pre('save', async function () {
+  console.log('persiapan menyimpan data')
+})
+productSchema.post('save', async function () {
+  console.log('data bershasil')
+})
+
 const Product = mongoose.model("Product", productSchema);
+
+async function run() {
+  const newProduct = new Product({
+    name: "Laptop",
+    price: 10000000,
+    discount: 20
+  })
+
+  console.log("Harga asli:", newProduct.price)        // 10000000
+  console.log("Harga diskon:", newProduct.finalPrice) // 8000000
+}
+
+run()
+
+// const changeStock = async (id) => {
+//     const foundProduct = await Product.findById(id)
+//     await foundProduct.outStock()
+//     console.log('Berhasil diubah')
+// }
+
+// changeStock('68b84c6ec960917c2e93ecac')
+
+
 
 // const products = [ 
 // 	{
@@ -185,20 +226,21 @@ const Product = mongoose.model("Product", productSchema);
 //         console.log("Error insert:", err);
 //     });
 
-Product.findOneAndUpdate(
-  { name: 'Kemeja Flanel' }, // filter
-  { 
-    $set: { 
-      price: 250000, // update hanya field yang diubah
-      color: 'hitam',
-      stock: 30
-    }
-  }, 
-  { new: true, runValidators: true } // opsi: return data baru + jalankan validator
-)
-.then(result => {
-  console.log("Update sukses:", result);
-})
-.catch(err => {
-  console.log("Error update:", err);
-});
+// Product.findOneAndUpdate(
+//   { name: 'Kemeja Flanel' }, // filter
+//   { 
+//     $set: { 
+//       price: 250000, // update hanya field yang diubah
+//       color: 'hitam',
+//       stock: 30
+//     }
+//   }, 
+//   { new: true, runValidators: true } // opsi: return data baru + jalankan validator
+// )
+// .then(result => {
+//   console.log("Update sukses:", result);
+// })
+// .catch(err => {
+//   console.log("Error update:", err);
+// });
+
